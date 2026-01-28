@@ -62,3 +62,11 @@ typings/
 
 #visualstudio config
 .vscode
+
+# Frontend build and dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/.turbo/
+
+# Vite
+frontend/.vite/

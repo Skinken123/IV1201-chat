@@ -9,7 +9,9 @@
     "non-interactive-test": "node node_modules/jest/bin/jest.js --forceExit --detectOpenHandles --silent --coverage",
     "test": "node node_modules/jest/bin/jest.js --runInBand --watchAll --detectOpenHandles --silent --coverage",
     "start-dev": "NODE_ENV=development && node_modules/nodemon/bin/nodemon.js src/server",
-    "start": "NODE_ENV=production && node_modules/nodemon/bin/nodemon.js src/server"
+    "start": "NODE_ENV=production && node_modules/nodemon/bin/nodemon.js src/server",
+    "dev": "concurrently \"npm run start-dev\" \"cd frontend && npm run dev\"",
+    "install-all": "npm install && cd frontend && npm install"
   },
   "jest": {
     "testPathIgnorePatterns": [
@@ -31,6 +33,7 @@
     "verror": "^1.10.1"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "eslint-config-google": "^0.14.0",
     "eslint-utils": "^3.0.0",
