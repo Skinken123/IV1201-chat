@@ -1,5 +1,6 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { 
+import axios from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { 
   User, 
   Message, 
   LoginRequest, 
@@ -8,10 +9,12 @@ import {
   UserResponse,
   MessageResponse,
   MessagesResponse,
-  LoginResponse,
-  HttpStatus,
+  LoginResponse
+} from '../types';
+import { 
   API_ENDPOINTS,
-  DEFAULT_API_CONFIG 
+  DEFAULT_API_CONFIG,
+  HttpStatus
 } from '../types';
 
 /**
@@ -84,7 +87,7 @@ class ApiClient {
    * Extract success data from API response
    */
   private extractSuccessData<T>(response: AxiosResponse<ApiResponse<T>>): T {
-    if (response.data && 'success' in response.data) {
+    if (response.data && 'success' in response.data && response.data.success) {
       return response.data.success;
     }
     throw new Error('Invalid API response format');

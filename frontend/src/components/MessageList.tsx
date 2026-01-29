@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import { useMessages, useMessagesLoading, useMessagesError } from '../context';
 import { useApp } from '../context';
 import { useCurrentUser } from '../context';
-import { Message } from '../types';
+import type { Message } from '../types';
 import './MessageList.css';
 
 /**

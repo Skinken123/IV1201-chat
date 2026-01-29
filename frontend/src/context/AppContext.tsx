@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { AppState, Message } from '../types';
+import React from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { AppState, Message } from '../types';
 import { messageService, parseApiError } from '../services';
 import { useAuth } from './AuthContext';
 
@@ -104,7 +106,7 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialAppState);
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   /**
    * Load all messages

@@ -5,27 +5,28 @@ export * from './Common';
 export * from './Api';
 
 // Re-export commonly used combinations for easier importing
-export { 
+export type { 
   User, 
   LoginRequest, 
   UserResponse, 
   ErrorResponse 
 } from './User';
 
-export { 
+export type { 
   Message, 
   CreateMessageRequest, 
   MessageResponse, 
   MessageWithAuthor 
 } from './Message';
 
-export { 
+export type { 
   ApiResponse, 
   AuthState, 
   AppState, 
-  HttpStatus,
-  ValidationError 
+  ValidationError
 } from './Common';
+
+export { HttpStatus } from './Common';
 
 export { 
   API_ENDPOINTS, 

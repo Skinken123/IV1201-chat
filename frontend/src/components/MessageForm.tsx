@@ -1,4 +1,6 @@
-import React, { useState, FormEvent } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useApp } from '../context';
 import './MessageForm.css';
 
@@ -27,7 +29,7 @@ export const MessageForm: React.FC = () => {
       setMessage(''); // Clear form on success
     } catch (error) {
       console.error('Failed to send message:', error);
-      alert(error.message || 'Failed to send message. Please try again.');
+      alert((error as Error).message || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

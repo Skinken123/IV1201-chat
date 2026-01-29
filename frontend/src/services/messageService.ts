@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { Message } from '../types';
+import type { Message } from '../types';
 
 /**
  * Message service for handling message-related operations
@@ -13,7 +13,7 @@ export class MessageService {
       const messages = await apiClient.getAllMessages();
       return this.processMessages(messages);
     } catch (error) {
-      throw new Error(`Failed to fetch messages: ${error.message}`);
+      throw new Error(`Failed to fetch messages: ${(error as Error).message}`);
     }
   }
 
@@ -31,7 +31,7 @@ export class MessageService {
       const message = await apiClient.createMessage(validation.content!);
       return this.processMessage(message);
     } catch (error) {
-      throw new Error(`Failed to create message: ${error.message}`);
+      throw new Error(`Failed to create message: ${(error as Error).message}`);
     }
   }
 
@@ -46,7 +46,7 @@ export class MessageService {
     try {
       await apiClient.deleteMessage(id);
     } catch (error) {
-      throw new Error(`Failed to delete message: ${error.message}`);
+      throw new Error(`Failed to delete message: ${(error as Error).message}`);
     }
   }
 
