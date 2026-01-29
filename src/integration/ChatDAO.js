@@ -20,11 +20,26 @@ class ChatDAO {
   constructor() {
     const namespace = cls.createNamespace('chat-db');
     Sequelize.useCLS(namespace);
+    
+    // Determine database host based on environment
+    const isDocker = process.env.DOCKER_DB === 'true';
+    const host = isDocker ? 'postgres' : process.env.DB_HOST;
+    
     this.database = new Sequelize(
         process.env.DB_NAME,
         process.env.DB_USER,
         process.env.DB_PASS,
-        {host: process.env.DB_HOST, dialect: process.env.DB_DIALECT},
+        {
+          host: host, 
+          dialect: process.env.DB_DIALECT,
+          logging: process.env.NODE_ENV === 'development' ? console.log : false,
+          pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
+          }
+        },
     );
     User.createModel(this.database);
     Msg.createModel(this.database);
