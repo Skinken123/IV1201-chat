@@ -11,16 +11,16 @@ export interface ApiConfig {
  */
 export const API_ENDPOINTS = {
   // User endpoints
-  LOGIN: '/api/user/login',
-  GET_USER: (id: number) => `/api/user/${id}`,
+  LOGIN: '/user/login',
+  GET_USER: (id: number) => `/user/${id}`,
   
   // Message endpoints
-  GET_ALL_MESSAGES: '/api/msg',
-  CREATE_MESSAGE: '/api/msg',
-  DELETE_MESSAGE: (id: number) => `/api/msg/${id}`,
+  GET_ALL_MESSAGES: '/msg',
+  CREATE_MESSAGE: '/msg',
+  DELETE_MESSAGE: (id: number) => `/msg/${id}`,
   
   // Root endpoint
-  ROOT: '/api'
+  ROOT: '/'
 } as const;
 
 /**

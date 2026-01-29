@@ -64,7 +64,7 @@ class ChatDAO {
   async createTables() {
     try {
       await this.database.authenticate();
-      await this.database.sync({force: false});
+      await this.database.sync({alter: false, force: false});
     } catch (err) {
       throw new WError(
           {
@@ -166,6 +166,36 @@ class ChatDAO {
   }
 
   /**
+   * Creates a new user with the specified username.
+   *
+   * @param {string} username The username of the user to create.
+   * @return {UserDTO} The newly created user.
+   * @throws Throws an exception if failed to create the user.
+   */
+  async createUser(username) {
+    try {
+      Validators.isNonZeroLengthString(username, 'username');
+      Validators.isAlnumString(username, 'username');
+      
+      const userModel = await User.create({
+        username: username,
+      });
+      return this.createUserDto(userModel);
+    } catch (err) {
+      throw new WError(
+          {
+            cause: err,
+            info: {
+              ChatDAO: 'Failed to create user.',
+              username: username,
+            },
+          },
+          `Could not create user ${username}.`,
+      );
+    }
+  }
+
+  /**
    * Creates the specified message.
    *
    * @param {string} msg The message to add.
@@ -233,7 +263,7 @@ class ChatDAO {
    */
   async findAllMsgs() {
     try {
-      const msgs = await Msg.findAll({include: ['user']});
+      const msgs = await Msg.findAll({include: ['users']});
       return msgs.map((msgModel) =>
         this.createMsgDto(msgModel, msgModel.user),
       );

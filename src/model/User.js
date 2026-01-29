@@ -10,7 +10,7 @@ class User extends Sequelize.Model {
    * The name of the User model.
    */
   static get USER_MODEL_NAME() {
-    return 'user';
+    return 'users';
   }
 
   /**

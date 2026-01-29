@@ -42,12 +42,14 @@ class Controller {
     return this.transactionMgr.transaction(async (t1) => {
       Validators.isNonZeroLengthString(username, 'username');
       Validators.isAlnumString(username, 'username');
-      const users = await this.chatDAO.findUserByUsername(username);
+      let users = await this.chatDAO.findUserByUsername(username);
       if (users.length === 0) {
-        return null;
+        // Auto-create user if not exists
+        const newUser = await this.chatDAO.createUser(username);
+        users = [newUser];
       }
       const loggedInUser = users[0];
-      await this.setUsersStatusToLoggedIn(users[0]);
+      await this.setUsersStatusToLoggedIn(loggedInUser);
       return loggedInUser;
     });
   }

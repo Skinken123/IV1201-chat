@@ -11,18 +11,16 @@ class Msg extends Sequelize.Model {
    * The name of the Msg model.
    */
   static get MSG_MODEL_NAME() {
-    return 'msg';
+    return 'msgs';
   }
 
   /**
    * Defines the Msg entity.
    *
    * @param {Sequelize} sequelize The sequelize object.
-   * @param {Models} models An instance of the Models class, which contains all
-   *                        other models. Used to create associations.
    * @return {Model} A sequelize model describing the Msg entity.
    */
-  static createModel(sequelize, models) {
+  static createModel(sequelize) {
     Msg.init(
         {
           msg: {
