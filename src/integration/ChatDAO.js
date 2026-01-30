@@ -263,7 +263,7 @@ class ChatDAO {
    */
   async findAllMsgs() {
     try {
-      const msgs = await Msg.findAll({include: ['users']});
+      const msgs = await Msg.findAll({include: ['user']});
       return msgs.map((msgModel) =>
         this.createMsgDto(msgModel, msgModel.user),
       );
