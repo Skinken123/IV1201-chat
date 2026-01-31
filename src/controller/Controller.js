@@ -14,7 +14,8 @@ class Controller {
    */
   constructor() {
     this.chatDAO = new ChatDAO();
-    this.transactionMgr = this.chatDAO.getTransactionMgr();
+    // In Drizzle, the 'transaction manager' is just the DB instance itself
+    this.db = this.chatDAO.db;
   }
 
   /**
@@ -39,17 +40,18 @@ class Controller {
    *         user.
    */
   async login(username) {
-    return this.transactionMgr.transaction(async (t1) => {
+    return this.db.transaction(async (tx) => {
       Validators.isNonZeroLengthString(username, 'username');
       Validators.isAlnumString(username, 'username');
-      let users = await this.chatDAO.findUserByUsername(username);
+
+      let users = await this.chatDAO.findUserByUsername(username, tx);
       if (users.length === 0) {
         // Auto-create user if not exists
-        const newUser = await this.chatDAO.createUser(username);
+        const newUser = await this.chatDAO.createUser(username, tx);
         users = [newUser];
       }
       const loggedInUser = users[0];
-      await this.setUsersStatusToLoggedIn(loggedInUser);
+      await this.setUsersStatusToLoggedIn(loggedInUser, tx);
       return loggedInUser;
     });
   }
@@ -64,10 +66,10 @@ class Controller {
    *         is logged in.
    */
   async isLoggedIn(username) {
-    return this.transactionMgr.transaction(async (t1) => {
+    return this.db.transaction(async (tx) => {
       Validators.isNonZeroLengthString(username, 'username');
       Validators.isAlnumString(username, 'username');
-      const users = await this.chatDAO.findUserByUsername(username);
+      const users = await this.chatDAO.findUserByUsername(username, tx);
       if (users.length === 0) {
         return null;
       }
@@ -93,10 +95,10 @@ class Controller {
    * @throws Throws an exception if failed to add the specified message.
    */
   async addMsg(msg, author) {
-    return this.transactionMgr.transaction(async (t1) => {
+    return this.db.transaction(async (tx) => {
       Validators.isNonZeroLengthString(msg, 'msg');
       Validators.isInstanceOf(author, UserDTO, 'user', 'UserDTO');
-      return await this.chatDAO.createMsg(msg, author);
+      return await this.chatDAO.createMsg(msg, author, tx);
     });
   }
 
@@ -109,9 +111,9 @@ class Controller {
    * @throws Throws an exception if failed to search for the specified message.
    */
   async findMsg(msgId) {
-    return this.transactionMgr.transaction(async (t1) => {
+    return this.db.transaction(async (tx) => {
       Validators.isPositiveInteger(msgId, 'msgId');
-      return await this.chatDAO.findMsgById(msgId);
+      return await this.chatDAO.findMsgById(msgId, tx);
     });
   }
 
@@ -123,9 +125,9 @@ class Controller {
    *                  no such user.
    * @throws Throws an exception if failed to search for the specified user.
    */
-  findUser(id) {
-    return this.transactionMgr.transaction(async (t1) => {
-      return this.chatDAO.findUserById(id);
+  async findUser(id) {
+    return this.db.transaction(async (tx) => {
+      return await this.chatDAO.findUserById(id, tx);
     });
   }
 
@@ -137,8 +139,8 @@ class Controller {
    * @throws Throws an exception if failed to search for the specified message.
    */
   async findAllMsgs() {
-    return this.transactionMgr.transaction(async (t1) => {
-      return await this.chatDAO.findAllMsgs();
+    return this.db.transaction(async (tx) => {
+      return await this.chatDAO.findAllMsgs(tx);
     });
   }
 
@@ -149,9 +151,9 @@ class Controller {
    * @throws Throws an exception if failed to delete the specified message.
    */
   async deleteMsg(msgId) {
-    return this.transactionMgr.transaction(async (t1) => {
+    return this.db.transaction(async (tx) => {
       Validators.isPositiveInteger(msgId, 'msgId');
-      await this.chatDAO.deleteMsg(msgId);
+      await this.chatDAO.deleteMsg(msgId, tx);
     });
   }
 
@@ -160,11 +162,27 @@ class Controller {
    */
 
   // eslint-disable-next-line require-jsdoc
-  async setUsersStatusToLoggedIn(user) {
+  async setUsersStatusToLoggedIn(user, tx) {
     const hoursToStayLoggedIn = 24;
     const now = new Date();
-    user.loggedInUntil = now.setHours(now.getHours() + hoursToStayLoggedIn);
-    await this.chatDAO.updateUser(user);
+    user.loggedInUntil = now.setHours(now.getHours() + hoursToStayLoggedIn); // This might return a number, careful!
+    // Utils: Date.setHours returns a timestamp number.
+    // Drizzle expects Date object for timestamp mode in writes usually, OR number if it's raw.
+    // Let's ensure it's a Date object if the DTO/DAO expects strict typing or if we want to be safe.
+    // The previous code: 
+    // user.loggedInUntil = now.setHours(...) -> this sets it to a number.
+    // ChatDAO.updateUser(user) -> User.update(user) -> Sequelize handles numbers as dates often.
+    // Drizzle: `loggedInUntil` in schema is `timestamp({ mode: 'date' })`.
+    // It expects a JS Date object.
+    // So `user.loggedInUntil` (on the DTO) currently holds a number after this line.
+    // ChatDAO `updateUser` takes `user.loggedInUntil`.
+    // Drizzle `update(...).set({ loggedInUntil: ... })`.
+    // If we pass a number to Drizzle timestamp-mode-date column, it might complain or might work.
+    // SAFEST: Convert back to Date.
+
+    user.loggedInUntil = new Date(user.loggedInUntil);
+
+    await this.chatDAO.updateUser(user, tx);
   }
 
   // eslint-disable-next-line require-jsdoc
